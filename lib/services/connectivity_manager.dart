@@ -15,13 +15,28 @@ class ConnectivityManager extends ChangeNotifier {
   final NotificationService _notificationService = NotificationService();
 
   static const String SERVICE_ID = "com.resqlink.emergency";
-  static const Strategy STRATEGY = Strategy.P2P_CLUSTER;
+  static const Strategy STRATEGY = Strategy
+      .P2P_STAR; // ⚡ OPTIMIZED: P2P_STAR for faster discovery & longer range
 
   // Connection state
   bool _isAdvertising = false;
   bool _isDiscovering = false;
   Set<String> _connectedDevices = {};
   Set<String> _seenMessageIds = {};
+  Map<String, int> _connectionRetries = {}; // Track retry attempts per endpoint
+  Map<String, DateTime> _lastConnectionAttempt =
+      {}; // Track last connection time
+
+  // 🔥 RANGE OPTIMIZATION: Aggressive discovery settings
+  Timer? _rediscoveryTimer;
+  static const Duration REDISCOVERY_INTERVAL = Duration(
+    seconds: 15,
+  ); // Re-scan every 15s
+  static const int MAX_CONNECTION_RETRIES =
+      5; // Try connecting 5 times before giving up
+  static const Duration RETRY_BACKOFF = Duration(
+    seconds: 3,
+  ); // Wait 3s between retries
 
   // Context for showing in-app alerts
   BuildContext? _appContext;
@@ -103,6 +118,12 @@ class ConnectivityManager extends ChangeNotifier {
       );
 
       _isDiscovering = result;
+
+      // 🔥 RANGE OPTIMIZATION: Start aggressive re-discovery timer
+      if (result) {
+        _startAggressiveDiscovery();
+      }
+
       notifyListeners();
       return result;
     } catch (e) {
@@ -111,6 +132,40 @@ class ConnectivityManager extends ChangeNotifier {
       }
       return false;
     }
+  }
+
+  /// 🚀 RANGE BOOSTER: Aggressive re-discovery to catch devices that come in/out of range
+  void _startAggressiveDiscovery() {
+    _rediscoveryTimer?.cancel();
+    _rediscoveryTimer = Timer.periodic(REDISCOVERY_INTERVAL, (timer) async {
+      if (!_isDiscovering) {
+        timer.cancel();
+        return;
+      }
+
+      if (kDebugMode) {
+        print(
+          '🔍 Re-scanning for nearby devices... (Connected: ${_connectedDevices.length})',
+        );
+      }
+
+      // Briefly restart discovery to catch new devices
+      try {
+        await _nearby.stopDiscovery();
+        await Future.delayed(const Duration(milliseconds: 500));
+        await _nearby.startDiscovery(
+          await _storage.getUserName(),
+          STRATEGY,
+          onEndpointFound: _onEndpointFound,
+          onEndpointLost: _onEndpointLost,
+          serviceId: SERVICE_ID,
+        );
+      } catch (e) {
+        if (kDebugMode) {
+          print('Re-discovery error: $e');
+        }
+      }
+    });
   }
 
   /// Stop advertising
@@ -129,6 +184,7 @@ class ConnectivityManager extends ChangeNotifier {
   /// Stop discovery
   Future<void> stopDiscovery() async {
     try {
+      _rediscoveryTimer?.cancel(); // Stop aggressive re-discovery
       await _nearby.stopDiscovery();
       _isDiscovering = false;
       notifyListeners();
@@ -162,10 +218,36 @@ class ConnectivityManager extends ChangeNotifier {
     String serviceId,
   ) {
     if (kDebugMode) {
-      print('Endpoint found: $endpointName');
+      print(
+        '📡 Endpoint found: $endpointName (ID: ${endpointId.substring(0, 8)}...)',
+      );
     }
 
-    // Automatically request connection
+    // 🚀 OPTIMIZED: Check if we should retry connection
+    final now = DateTime.now();
+    final lastAttempt = _lastConnectionAttempt[endpointId];
+    final retries = _connectionRetries[endpointId] ?? 0;
+
+    // Skip if we've tried too many times or tried too recently
+    if (retries >= MAX_CONNECTION_RETRIES) {
+      if (kDebugMode) {
+        print('⚠️ Max retries reached for $endpointName, skipping');
+      }
+      return;
+    }
+
+    if (lastAttempt != null && now.difference(lastAttempt) < RETRY_BACKOFF) {
+      if (kDebugMode) {
+        print('⏳ Waiting before retry for $endpointName');
+      }
+      return;
+    }
+
+    // Update connection tracking
+    _lastConnectionAttempt[endpointId] = now;
+    _connectionRetries[endpointId] = retries + 1;
+
+    // Automatically request connection with retry tracking
     _nearby.requestConnection(
       endpointName,
       endpointId,
@@ -203,8 +285,15 @@ class ConnectivityManager extends ChangeNotifier {
   void _onConnectionResult(String endpointId, Status status) {
     if (status == Status.CONNECTED) {
       _connectedDevices.add(endpointId);
+
+      // 🎉 SUCCESS: Reset retry counter on successful connection
+      _connectionRetries[endpointId] = 0;
+      _lastConnectionAttempt.remove(endpointId);
+
       if (kDebugMode) {
-        print('Connected to endpoint: $endpointId');
+        print(
+          '✅ Connected to endpoint: ${endpointId.substring(0, 8)}... (Total: ${_connectedDevices.length})',
+        );
       }
 
       // If we have an active SOS, immediately send to new peer
@@ -215,16 +304,26 @@ class ConnectivityManager extends ChangeNotifier {
       notifyListeners();
     } else {
       if (kDebugMode) {
-        print('Connection failed with endpoint: $endpointId');
+        print(
+          '❌ Connection failed with endpoint: ${endpointId.substring(0, 8)}... (Retry: ${_connectionRetries[endpointId] ?? 0}/$MAX_CONNECTION_RETRIES)',
+        );
       }
+      // Keep retry tracking - will retry on next discovery
     }
   }
 
   /// Callback when disconnected
   void _onDisconnected(String endpointId) {
     _connectedDevices.remove(endpointId);
+
+    // 🔄 RECONNECT OPTIMIZATION: Reset retry counter to allow reconnection
+    _connectionRetries.remove(endpointId);
+    _lastConnectionAttempt.remove(endpointId);
+
     if (kDebugMode) {
-      print('Disconnected from endpoint: $endpointId');
+      print(
+        '🔌 Disconnected from endpoint: ${endpointId.substring(0, 8)}... (Remaining: ${_connectedDevices.length})',
+      );
     }
     notifyListeners();
   }
@@ -372,6 +471,7 @@ class ConnectivityManager extends ChangeNotifier {
   @override
   void dispose() {
     _broadcastTimer?.cancel();
+    _rediscoveryTimer?.cancel();
     stopMeshNetworking();
     super.dispose();
   }

@@ -7,6 +7,7 @@ import '../services/connectivity_manager.dart';
 import '../services/location_service.dart';
 import '../services/message_storage.dart';
 import 'message_list_screen.dart';
+import 'settings_screen.dart';
 
 /// MainScreen - Primary interface with SOS button and status display
 class MainScreen extends StatefulWidget {
@@ -161,20 +162,61 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   void _showSuccessDialog(String message) {
     showDialog(
       context: context,
+      barrierDismissible: true,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.green.shade900,
-        title: const Row(
+        backgroundColor: Colors.grey.shade900,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
           children: [
-            Icon(Icons.check_circle, color: Colors.white),
-            SizedBox(width: 10),
-            Text('Success', style: TextStyle(color: Colors.white)),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.green.shade600, Colors.green.shade800],
+                ),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.check_circle_outline,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Success',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
-        content: Text(message, style: const TextStyle(color: Colors.white)),
+        content: Text(
+          message,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.9),
+            fontSize: 14,
+            height: 1.5,
+          ),
+        ),
         actions: [
-          TextButton(
+          ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK', style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green.shade700,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              'OK',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            ),
           ),
         ],
       ),
@@ -184,71 +226,59 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.red.shade900,
-        title: const Row(
-          children: [
-            Icon(Icons.error, color: Colors.white),
-            SizedBox(width: 10),
-            Text('Error', style: TextStyle(color: Colors.white)),
-          ],
-        ),
-        content: Text(message, style: const TextStyle(color: Colors.white)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showNameDialog() {
-    final controller = TextEditingController(text: _userName);
-
-    showDialog(
-      context: context,
+      barrierDismissible: true,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.grey.shade900,
-        title: const Text(
-          'Set Your Name',
-          style: TextStyle(color: Colors.white),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.error_outline,
+                color: Colors.red,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Error',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
-        content: TextField(
-          controller: controller,
-          style: const TextStyle(color: Colors.white),
-          decoration: const InputDecoration(
-            hintText: 'Enter your name',
-            hintStyle: TextStyle(color: Colors.white54),
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.white54),
-            ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.white),
-            ),
+        content: Text(
+          message,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.9),
+            fontSize: 14,
+            height: 1.5,
           ),
         ),
         actions: [
-          TextButton(
+          ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white54),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade700,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
-          ),
-          TextButton(
-            onPressed: () async {
-              final name = controller.text.trim();
-              if (name.isNotEmpty) {
-                await _storage.setUserName(name);
-                setState(() {
-                  _userName = name;
-                });
-              }
-              Navigator.pop(context);
-            },
-            child: const Text('Save', style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'OK',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            ),
           ),
         ],
       ),
@@ -367,8 +397,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             ),
           ),
           const Spacer(),
-          _buildIconButton(Icons.person, _showNameDialog, 'Profile'),
-          const SizedBox(width: 8),
           _buildIconButton(Icons.list_alt, () {
             Navigator.push(
               context,
@@ -377,6 +405,13 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               ),
             );
           }, 'Messages'),
+          const SizedBox(width: 8),
+          _buildIconButton(Icons.settings, () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SettingsScreen()),
+            );
+          }, 'Settings'),
         ],
       ),
     );
@@ -447,11 +482,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Identity',
+                  'DISPLAY NAME',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.6),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
                     letterSpacing: 1.5,
                   ),
                 ),
