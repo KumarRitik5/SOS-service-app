@@ -42,7 +42,6 @@ class ResQLink extends StatelessWidget {
             primary: Colors.red,
             secondary: Colors.redAccent,
             surface: Colors.grey.shade900,
-            background: Colors.black,
             error: Colors.red,
           ),
           appBarTheme: AppBarTheme(

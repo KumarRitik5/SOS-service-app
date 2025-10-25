@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
 
 /// AboutScreen - Displays information about the app creators
 class AboutScreen extends StatelessWidget {
-  const AboutScreen({Key? key}) : super(key: key);
+  const AboutScreen({super.key});
 
   final List<Map<String, String>> makers = const [
     {
@@ -23,46 +23,25 @@ class AboutScreen extends StatelessWidget {
     },
   ];
 
-  Future<void> _launchEmail(
-    BuildContext context,
-    String email,
-    String name,
-  ) async {
-    final Uri emailUri = Uri(
-      scheme: 'mailto',
-      path: email,
-      query: 'subject=ResQLink App - Inquiry',
-    );
-
+  void _copyEmail(BuildContext context, String email, String name) {
     try {
-      if (await canLaunchUrl(emailUri)) {
-        await launchUrl(emailUri, mode: LaunchMode.externalApplication);
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.info_outline, color: Colors.white),
-                  const SizedBox(width: 12),
-                  Expanded(child: Text('Email: $email')),
-                ],
-              ),
-              backgroundColor: Colors.blue.shade700,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              action: SnackBarAction(
-                label: 'COPY',
-                textColor: Colors.white,
-                onPressed: () {
-                  // Copy to clipboard functionality would go here
-                },
-              ),
+      Clipboard.setData(ClipboardData(text: email));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(child: Text('$name\'s email copied to clipboard')),
+              ],
             ),
-          );
-        }
+            backgroundColor: Colors.green.shade700,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            duration: const Duration(seconds: 2),
+          ),
+        );
       }
     } catch (e) {
       if (context.mounted) {
@@ -72,14 +51,13 @@ class AboutScreen extends StatelessWidget {
               children: [
                 const Icon(Icons.error_outline, color: Colors.white),
                 const SizedBox(width: 12),
-                const Expanded(child: Text('Could not open email app')),
+                const Expanded(child: Text('Failed to copy email')),
               ],
             ),
             backgroundColor: Colors.red.shade700,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -97,7 +75,7 @@ class AboutScreen extends StatelessWidget {
             colors: [
               Colors.black,
               Colors.grey.shade900,
-              Colors.purple.shade900.withOpacity(0.3),
+              Colors.purple.shade900.withValues(alpha: 0.3),
             ],
           ),
         ),
@@ -164,7 +142,7 @@ class AboutScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.purple.shade900.withOpacity(0.5), Colors.transparent],
+          colors: [Colors.purple.shade900.withValues(alpha: 0.5), Colors.transparent],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -196,15 +174,15 @@ class AboutScreen extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.red.shade900.withOpacity(0.4),
-            Colors.purple.shade900.withOpacity(0.3),
+            Colors.red.shade900.withValues(alpha: 0.4),
+            Colors.purple.shade900.withValues(alpha: 0.3),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.red.withOpacity(0.3),
+            color: Colors.red.withValues(alpha: 0.3),
             blurRadius: 20,
             spreadRadius: 5,
           ),
@@ -220,7 +198,7 @@ class AboutScreen extends StatelessWidget {
               ),
               shape: BoxShape.circle,
               boxShadow: [
-                BoxShadow(color: Colors.red.withOpacity(0.5), blurRadius: 20),
+                BoxShadow(color: Colors.red.withValues(alpha: 0.5), blurRadius: 20),
               ],
             ),
             child: const Icon(Icons.emergency, color: Colors.white, size: 48),
@@ -241,7 +219,7 @@ class AboutScreen extends StatelessWidget {
             'Emergency Mesh Network',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               letterSpacing: 1.5,
             ),
           ),
@@ -256,12 +234,12 @@ class AboutScreen extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.blue.shade900.withOpacity(0.3),
-            Colors.indigo.shade900.withOpacity(0.2),
+            Colors.blue.shade900.withValues(alpha: 0.3),
+            Colors.indigo.shade900.withValues(alpha: 0.2),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -285,7 +263,7 @@ class AboutScreen extends StatelessWidget {
             'ResQLink is a mesh networking emergency communication app that works without internet or cellular service. It uses Bluetooth and Wi-Fi to create a local network, allowing people to send SOS messages and share their location during emergencies.',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               height: 1.6,
             ),
           ),
@@ -310,7 +288,7 @@ class AboutScreen extends StatelessWidget {
             text,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
             ),
           ),
         ],
@@ -352,15 +330,15 @@ class AboutScreen extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.purple.shade900.withOpacity(0.3),
-              Colors.deepPurple.shade900.withOpacity(0.2),
+              Colors.purple.shade900.withValues(alpha: 0.3),
+              Colors.deepPurple.shade900.withValues(alpha: 0.2),
             ],
           ),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: Colors.purple.withOpacity(0.2),
+              color: Colors.purple.withValues(alpha: 0.2),
               blurRadius: 15,
               spreadRadius: 2,
             ),
@@ -380,7 +358,7 @@ class AboutScreen extends StatelessWidget {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.purple.withOpacity(0.5),
+                        color: Colors.purple.withValues(alpha: 0.5),
                         blurRadius: 10,
                       ),
                     ],
@@ -420,22 +398,22 @@ class AboutScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             GestureDetector(
-              onTap: () => _launchEmail(context, email, name),
+              onTap: () => _copyEmail(context, email, name),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.white.withOpacity(0.1)),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       Icons.email,
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                       size: 20,
                     ),
                     const SizedBox(width: 12),
@@ -444,13 +422,13 @@ class AboutScreen extends StatelessWidget {
                         email,
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                         ),
                       ),
                     ),
                     Icon(
                       Icons.open_in_new,
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.6),
                       size: 18,
                     ),
                   ],
@@ -469,23 +447,23 @@ class AboutScreen extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.grey.shade800.withOpacity(0.5),
-            Colors.grey.shade900.withOpacity(0.3),
+            Colors.grey.shade800.withValues(alpha: 0.5),
+            Colors.grey.shade900.withValues(alpha: 0.3),
           ],
         ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.info, color: Colors.white.withOpacity(0.6), size: 20),
+          Icon(Icons.info, color: Colors.white.withValues(alpha: 0.6), size: 20),
           const SizedBox(width: 12),
           Text(
             'Version 1.0.0',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -498,14 +476,14 @@ class AboutScreen extends StatelessWidget {
       children: [
         Text(
           '© 2025 ResQLink',
-          style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.5)),
+          style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5)),
         ),
         const SizedBox(height: 8),
         Text(
           'Built for RBCET STEM-SATION Hackathon',
           style: TextStyle(
             fontSize: 12,
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withValues(alpha: 0.5),
             fontStyle: FontStyle.italic,
           ),
         ),

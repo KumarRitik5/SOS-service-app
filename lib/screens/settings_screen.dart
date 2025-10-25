@@ -78,7 +78,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Text(
                 'This name will appear in your emergency broadcasts',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withValues(alpha: 0.6),
                   fontSize: 13,
                 ),
               ),
@@ -90,10 +90,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 style: const TextStyle(color: Colors.white, fontSize: 16),
                 decoration: InputDecoration(
                   hintText: 'Enter your full name',
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
+                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
                   errorText: errorText,
                   filled: true,
-                  fillColor: Colors.black.withOpacity(0.3),
+                  fillColor: Colors.black.withValues(alpha: 0.3),
                   prefixIcon: Icon(Icons.person, color: Colors.purple.shade300),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -102,7 +102,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
@@ -120,7 +120,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     borderRadius: BorderRadius.circular(12),
                     borderSide: const BorderSide(color: Colors.red, width: 2),
                   ),
-                  counterStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                  counterStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                 ),
                 onChanged: (value) {
                   setDialogState(() {
@@ -142,7 +142,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Text(
                 'Cancel',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withValues(alpha: 0.6),
                   fontSize: 15,
                 ),
               ),
@@ -248,7 +248,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.2),
+                color: Colors.red.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(
@@ -273,7 +273,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         content: Text(
           message,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
             height: 1.5,
           ),
@@ -287,7 +287,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Text(
               'Cancel',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
               ),
@@ -353,7 +353,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Text(
               'Optimizes your device for maximum range using WiFi Direct technology.',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 fontSize: 14,
                 height: 1.5,
               ),
@@ -372,9 +372,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.orange.shade900.withOpacity(0.3),
+                color: Colors.orange.shade900.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.orange.withOpacity(0.5)),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.5)),
               ),
               child: Row(
                 children: [
@@ -430,7 +430,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Text(
               text,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 13,
               ),
             ),
@@ -506,7 +506,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             colors: [
               Colors.black,
               Colors.grey.shade900,
-              Colors.purple.shade900.withOpacity(0.3),
+              Colors.purple.shade900.withValues(alpha: 0.3),
             ],
           ),
         ),
@@ -570,7 +570,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.purple.shade900.withOpacity(0.5), Colors.transparent],
+          colors: [Colors.purple.shade900.withValues(alpha: 0.5), Colors.transparent],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -591,7 +591,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.purple.withOpacity(0.5),
+                  color: Colors.purple.withValues(alpha: 0.5),
                   blurRadius: 10,
                   spreadRadius: 2,
                 ),
@@ -633,7 +633,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
             letterSpacing: 0.5,
           ),
         ),
@@ -647,15 +647,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.blue.shade900.withOpacity(0.4),
-            Colors.purple.shade900.withOpacity(0.3),
+            Colors.blue.shade900.withValues(alpha: 0.4),
+            Colors.purple.shade900.withValues(alpha: 0.3),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.1),
+            color: Colors.blue.withValues(alpha: 0.1),
             blurRadius: 20,
             spreadRadius: 2,
           ),
@@ -672,7 +672,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.blue.withOpacity(0.5),
+                  color: Colors.blue.withValues(alpha: 0.5),
                   blurRadius: 15,
                   spreadRadius: 2,
                 ),
@@ -688,7 +688,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Text(
                   'DISPLAY NAME',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 1.2,
@@ -717,7 +717,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.purple.withOpacity(0.3),
+                  color: Colors.purple.withValues(alpha: 0.3),
                   blurRadius: 8,
                   spreadRadius: 1,
                 ),
@@ -743,12 +743,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.deepPurple.shade900.withOpacity(0.3),
-            Colors.indigo.shade900.withOpacity(0.2),
+            Colors.deepPurple.shade900.withValues(alpha: 0.3),
+            Colors.indigo.shade900.withValues(alpha: 0.2),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
       ),
       child: Column(
         children: [
@@ -813,12 +813,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.teal.shade900.withOpacity(0.3),
-            Colors.cyan.shade900.withOpacity(0.2),
+            Colors.teal.shade900.withValues(alpha: 0.3),
+            Colors.cyan.shade900.withValues(alpha: 0.2),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
       ),
       child: Column(
         children: [
@@ -858,12 +858,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.purple.shade900.withOpacity(0.3),
-            Colors.pink.shade900.withOpacity(0.2),
+            Colors.purple.shade900.withValues(alpha: 0.3),
+            Colors.pink.shade900.withValues(alpha: 0.2),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
       ),
       child: Column(
         children: [
@@ -906,12 +906,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.red.shade900.withOpacity(0.3),
-            Colors.orange.shade900.withOpacity(0.2),
+            Colors.red.shade900.withValues(alpha: 0.3),
+            Colors.orange.shade900.withValues(alpha: 0.2),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.red.withOpacity(0.3), width: 1.5),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.3), width: 1.5),
       ),
       child: _buildActionTile(
         icon: Icons.delete_forever,
@@ -943,7 +943,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: Colors.white, size: 24),
@@ -965,7 +965,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
+                    color: Colors.white.withValues(alpha: 0.6),
                     fontSize: 13,
                   ),
                 ),
@@ -1002,7 +1002,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, color: iconColor ?? Colors.white, size: 24),
@@ -1024,7 +1024,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.6),
                       fontSize: 13,
                     ),
                   ),
@@ -1033,7 +1033,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             Icon(
               Icons.chevron_right,
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.white.withValues(alpha: 0.5),
               size: 24,
             ),
           ],
@@ -1046,7 +1046,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Divider(
       height: 1,
       thickness: 1,
-      color: Colors.white.withOpacity(0.1),
+      color: Colors.white.withValues(alpha: 0.1),
       indent: 16,
       endIndent: 16,
     );

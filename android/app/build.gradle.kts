@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.resqlink.emergency"
-    compileSdk = 36
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -26,7 +26,7 @@ android {
         applicationId = "com.resqlink.emergency"
         // Nearby Connections requires minimum SDK 21
         minSdk = flutter.minSdkVersion
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
         multiDexEnabled = true

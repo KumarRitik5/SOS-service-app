@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -11,7 +12,7 @@ import 'settings_screen.dart';
 
 /// MainScreen - Primary interface with SOS button and status display
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key}) : super(key: key);
+  const MainScreen({super.key});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -69,38 +70,74 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _initializeApp() async {
-    // Load user name
-    final name = await _storage.getUserName();
-    setState(() {
-      _userName = name;
-    });
+    try {
+      // Load user name
+      final name = await _storage.getUserName();
+      if (mounted) {
+        setState(() {
+          _userName = name;
+        });
+      }
 
-    // Request permissions
-    await _requestPermissions();
+      // Request permissions
+      await _requestPermissions();
 
-    // Start mesh networking
-    final connectivityManager = Provider.of<ConnectivityManager>(
-      context,
-      listen: false,
-    );
+      // Start mesh networking
+      if (!mounted) return;
+      
+      final connectivityManager = Provider.of<ConnectivityManager>(
+        context,
+        listen: false,
+      );
 
-    // Set context for in-app alerts
-    connectivityManager.setContext(context);
+      // Set context for in-app alerts
+      connectivityManager.setContext(context);
 
-    await connectivityManager.startMeshNetworking();
+      await connectivityManager.startMeshNetworking();
+      
+      if (kDebugMode) {
+        print('✅ App initialized successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error initializing app: $e');
+      }
+      if (mounted) {
+        _showErrorDialog('Failed to initialize app. Some features may not work properly.');
+      }
+    }
   }
 
   Future<void> _requestPermissions() async {
-    // Request all necessary permissions
-    await [
-      Permission.bluetooth,
-      Permission.bluetoothScan,
-      Permission.bluetoothAdvertise,
-      Permission.bluetoothConnect,
-      Permission.location,
-      Permission.locationWhenInUse,
-      Permission.nearbyWifiDevices,
-    ].request();
+    try {
+      // Request all necessary permissions
+      final statuses = await [
+        Permission.bluetooth,
+        Permission.bluetoothScan,
+        Permission.bluetoothAdvertise,
+        Permission.bluetoothConnect,
+        Permission.location,
+        Permission.locationWhenInUse,
+        Permission.nearbyWifiDevices,
+      ].request();
+      
+      // Check if any critical permissions were denied
+      bool allGranted = statuses.values.every((status) => status.isGranted);
+      
+      if (!allGranted && mounted) {
+        _showErrorDialog(
+          'Some permissions were denied. The app may not function properly. '
+          'Please grant all permissions in Settings.',
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error requesting permissions: $e');
+      }
+      if (mounted) {
+        _showErrorDialog('Failed to request permissions. Please try again.');
+      }
+    }
   }
 
   Future<void> _sendSOS() async {
@@ -196,7 +233,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         content: Text(
           message,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
             fontSize: 14,
             height: 1.5,
           ),
@@ -235,7 +272,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.2),
+                color: Colors.red.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(
@@ -258,7 +295,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         content: Text(
           message,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
             fontSize: 14,
             height: 1.5,
           ),
@@ -296,7 +333,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             colors: [
               Colors.black,
               Colors.grey.shade900,
-              Colors.red.shade900.withOpacity(0.3),
+              Colors.red.shade900.withValues(alpha: 0.3),
             ],
           ),
         ),
@@ -361,7 +398,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.red.shade900.withOpacity(0.5), Colors.transparent],
+          colors: [Colors.red.shade900.withValues(alpha: 0.5), Colors.transparent],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -377,7 +414,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.red.withOpacity(0.5),
+                  color: Colors.red.withValues(alpha: 0.5),
                   blurRadius: 10,
                   spreadRadius: 2,
                 ),
@@ -426,8 +463,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.white.withOpacity(0.1),
-            Colors.white.withOpacity(0.05),
+            Colors.white.withValues(alpha: 0.1),
+            Colors.white.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(12),
@@ -447,15 +484,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.blue.shade900.withOpacity(0.3),
-            Colors.purple.shade900.withOpacity(0.2),
+            Colors.blue.shade900.withValues(alpha: 0.3),
+            Colors.purple.shade900.withValues(alpha: 0.2),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.2),
+            color: Colors.blue.withValues(alpha: 0.2),
             blurRadius: 20,
             spreadRadius: 5,
           ),
@@ -471,7 +508,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               ),
               shape: BoxShape.circle,
               boxShadow: [
-                BoxShadow(color: Colors.blue.withOpacity(0.5), blurRadius: 15),
+                BoxShadow(color: Colors.blue.withValues(alpha: 0.5), blurRadius: 15),
               ],
             ),
             child: const Icon(Icons.person, color: Colors.white, size: 36),
@@ -484,7 +521,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 Text(
                   'DISPLAY NAME',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
+                    color: Colors.white.withValues(alpha: 0.6),
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 1.5,
@@ -518,19 +555,19 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         gradient: LinearGradient(
           colors: isConnected
               ? [
-                  Colors.green.shade900.withOpacity(0.3),
-                  Colors.teal.shade900.withOpacity(0.2),
+                  Colors.green.shade900.withValues(alpha: 0.3),
+                  Colors.teal.shade900.withValues(alpha: 0.2),
                 ]
               : [
-                  Colors.orange.shade900.withOpacity(0.3),
-                  Colors.red.shade900.withOpacity(0.2),
+                  Colors.orange.shade900.withValues(alpha: 0.3),
+                  Colors.red.shade900.withValues(alpha: 0.2),
                 ],
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isConnected
-              ? Colors.green.withOpacity(0.4)
-              : Colors.orange.withOpacity(0.4),
+              ? Colors.green.withValues(alpha: 0.4)
+              : Colors.orange.withValues(alpha: 0.4),
           width: 1.5,
         ),
         boxShadow: [
@@ -557,7 +594,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               boxShadow: [
                 BoxShadow(
                   color: (isConnected ? Colors.green : Colors.orange)
-                      .withOpacity(0.5),
+                      .withValues(alpha: 0.5),
                   blurRadius: 15,
                 ),
               ],
@@ -576,7 +613,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 Text(
                   'MESH NETWORK',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
+                    color: Colors.white.withValues(alpha: 0.6),
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.5,
@@ -623,15 +660,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.deepPurple.shade900.withOpacity(0.3),
-            Colors.indigo.shade900.withOpacity(0.2),
+            Colors.deepPurple.shade900.withValues(alpha: 0.3),
+            Colors.indigo.shade900.withValues(alpha: 0.2),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.deepPurple.withOpacity(0.2),
+            color: Colors.deepPurple.withValues(alpha: 0.2),
             blurRadius: 20,
             spreadRadius: 5,
           ),
@@ -644,14 +681,14 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             children: [
               Icon(
                 Icons.message,
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 size: 24,
               ),
               const SizedBox(width: 12),
               Text(
                 'EMERGENCY MESSAGE',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withValues(alpha: 0.8),
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.5,
@@ -662,9 +699,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           const SizedBox(height: 16),
           Container(
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
             child: TextField(
               controller: _messageController,
@@ -674,12 +711,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               decoration: InputDecoration(
                 hintText: 'Describe your emergency...',
                 hintStyle: TextStyle(
-                  color: Colors.white.withOpacity(0.4),
+                  color: Colors.white.withValues(alpha: 0.4),
                   fontSize: 14,
                 ),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.all(16),
-                counterStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                counterStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
               ),
             ),
           ),
@@ -697,7 +734,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           child: Text(
             'QUICK MESSAGES',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: 0.6),
               fontSize: 11,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.5,
@@ -774,12 +811,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.red.withOpacity(0.6),
+                color: Colors.red.withValues(alpha: 0.6),
                 blurRadius: 40,
                 spreadRadius: 10,
               ),
               BoxShadow(
-                color: Colors.red.withOpacity(0.4),
+                color: Colors.red.withValues(alpha: 0.4),
                 blurRadius: 80,
                 spreadRadius: 20,
               ),
@@ -795,7 +832,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                     width: 3,
                   ),
                 ),
@@ -807,7 +844,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.4),
+                    color: Colors.white.withValues(alpha: 0.4),
                     width: 2,
                   ),
                 ),
@@ -858,12 +895,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.blue.shade800.withOpacity(0.5),
-            Colors.purple.shade800.withOpacity(0.3),
+            Colors.blue.shade800.withValues(alpha: 0.5),
+            Colors.purple.shade800.withValues(alpha: 0.3),
           ],
         ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -904,13 +941,13 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [color.withOpacity(0.6), color.withOpacity(0.4)],
+              colors: [color.withValues(alpha: 0.6), color.withValues(alpha: 0.4)],
             ),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: color.withOpacity(0.8), width: 1.5),
+            border: Border.all(color: color.withValues(alpha: 0.8), width: 1.5),
             boxShadow: [
               BoxShadow(
-                color: color.withOpacity(0.3),
+                color: color.withValues(alpha: 0.3),
                 blurRadius: 10,
                 spreadRadius: 2,
               ),

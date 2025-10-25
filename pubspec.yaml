@@ -50,9 +50,6 @@ dependencies:
   # UUID generation for message IDs
   uuid: ^4.3.3
   
-  # URL launcher for opening maps
-  url_launcher: ^6.2.3
-  
   # State management
   provider: ^6.1.1
   

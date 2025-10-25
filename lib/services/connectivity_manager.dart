@@ -336,14 +336,15 @@ class ConnectivityManager extends ChangeNotifier {
         final resqMessage = ResQMessage.fromJsonString(message);
 
         if (kDebugMode) {
-          print('Received message: ${resqMessage.id}');
+          print('📥 Received message: ${resqMessage.id.substring(0, 8)}... from ${resqMessage.name}');
         }
 
         _handleReceivedMessage(resqMessage, endpointId);
       } catch (e) {
         if (kDebugMode) {
-          print('Error parsing received message: $e');
+          print('❌ Error parsing received message: $e');
         }
+        // Silently continue - don't crash on bad messages
       }
     }
   }
@@ -353,37 +354,56 @@ class ConnectivityManager extends ChangeNotifier {
     ResQMessage message,
     String fromEndpointId,
   ) async {
-    // Check if we've seen this message before
-    if (_seenMessageIds.contains(message.id)) {
-      if (kDebugMode) {
-        print('Duplicate message, ignoring: ${message.id}');
+    try {
+      // Check if we've seen this message before
+      if (_seenMessageIds.contains(message.id)) {
+        if (kDebugMode) {
+          print('⏭️  Duplicate message ignored: ${message.id.substring(0, 8)}...');
+        }
+        return;
       }
-      return;
+
+      // Mark as seen
+      _seenMessageIds.add(message.id);
+
+      // Store the message
+      await _storage.saveMessage(message);
+
+      if (kDebugMode) {
+        print(
+          '🚨 New SOS from ${message.name}: ${message.message} (Hop: ${message.hopCount})',
+        );
+      }
+
+      // Show emergency notification with sound and vibration
+      try {
+        await _notificationService.showEmergencyNotification(message);
+      } catch (e) {
+        if (kDebugMode) {
+          print('⚠️  Failed to show notification: $e');
+        }
+      }
+
+      // Show in-app alert if app is open
+      if (_appContext != null && _appContext!.mounted) {
+        try {
+          await _notificationService.showInAppAlert(_appContext!, message);
+        } catch (e) {
+          if (kDebugMode) {
+            print('⚠️  Failed to show in-app alert: $e');
+          }
+        }
+      }
+
+      // Relay to all other connected devices with incremented hop count (mesh relay)
+      final relayMessage = message.incrementHop();
+      _relayMessageToOthers(relayMessage, fromEndpointId);
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error handling received message: $e');
+      }
+      // Don't rethrow - keep mesh network running
     }
-
-    // Mark as seen
-    _seenMessageIds.add(message.id);
-
-    // Store the message
-    await _storage.saveMessage(message);
-
-    if (kDebugMode) {
-      print(
-        'New SOS from ${message.name}: ${message.message} (Hop: ${message.hopCount})',
-      );
-    }
-
-    // 🚨 SHOW EMERGENCY NOTIFICATION WITH SOUND AND VIBRATION 🚨
-    await _notificationService.showEmergencyNotification(message);
-
-    // Show in-app alert if app is open
-    if (_appContext != null && _appContext!.mounted) {
-      await _notificationService.showInAppAlert(_appContext!, message);
-    }
-
-    // Relay to all other connected devices with incremented hop count (mesh relay)
-    final relayMessage = message.incrementHop();
-    _relayMessageToOthers(relayMessage, fromEndpointId);
   }
 
   /// Relay message to all connected devices except the sender
@@ -416,31 +436,41 @@ class ConnectivityManager extends ChangeNotifier {
 
   /// Broadcast SOS message to all connected peers
   Future<void> broadcastSOSMessage(ResQMessage message) async {
-    _currentSOSMessage = message;
-    _broadcastCount = 0;
+    try {
+      _currentSOSMessage = message;
+      _broadcastCount = 0;
 
-    // Save our own message
-    await _storage.saveMessage(message);
-    _seenMessageIds.add(message.id);
+      // Save our own message
+      await _storage.saveMessage(message);
+      _seenMessageIds.add(message.id);
 
-    // Send to all currently connected devices
-    _broadcastToAll(message);
+      // Send to all currently connected devices
+      _broadcastToAll(message);
 
-    // Start periodic broadcast timer (every 10 seconds for 5 minutes)
-    _broadcastTimer?.cancel();
-    _broadcastTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
-      _broadcastCount++;
+      // Start periodic broadcast timer (every 10 seconds for 5 minutes)
+      _broadcastTimer?.cancel();
+      _broadcastTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+        _broadcastCount++;
 
-      if (_broadcastCount >= MAX_BROADCASTS) {
-        timer.cancel();
-        _currentSOSMessage = null;
-        if (kDebugMode) {
-          print('SOS broadcast completed');
+        if (_broadcastCount >= MAX_BROADCASTS) {
+          timer.cancel();
+          _currentSOSMessage = null;
+          if (kDebugMode) {
+            print('✅ SOS broadcast completed (${_broadcastCount} broadcasts)');
+          }
+        } else {
+          _broadcastToAll(message);
+          if (kDebugMode) {
+            print('📡 Broadcasting SOS... (${_broadcastCount}/$MAX_BROADCASTS)');
+          }
         }
-      } else {
-        _broadcastToAll(message);
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error broadcasting SOS message: $e');
       }
-    });
+      rethrow; // Rethrow so UI can handle it
+    }
   }
 
   /// Broadcast message to all connected devices

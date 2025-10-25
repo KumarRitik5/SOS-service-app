@@ -20,9 +20,6 @@
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"
         android:usesPermissionFlags="neverForLocation" />
     
-    <!-- Internet permission for maps -->
-    <uses-permission android:name="android.permission.INTERNET"/>
-    
     <!-- Foreground service for persistent mesh networking -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
@@ -81,14 +78,6 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
-        <!-- For opening maps -->
-        <intent>
-            <action android:name="android.intent.action.VIEW"/>
-            <data android:scheme="geo"/>
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.VIEW"/>
-            <data android:scheme="https"/>
-        </intent>
+
     </queries>
 </manifest>
